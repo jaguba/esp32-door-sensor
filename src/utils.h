@@ -2,7 +2,7 @@
 
 String GetWakeupReasonFromSleep()
 {
-  //obtener el motivo por el que se inicia después del deep slepp
+  //get wake up reason
   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
 
   switch(wakeup_reason)
