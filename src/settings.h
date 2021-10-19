@@ -5,6 +5,7 @@
 #define WIFI_HOSTNAME "ESPNOW_1"
 #define WIFI_SSID "yourssid"
 #define WIFI_PASSWORD "yourpassw0rd"
+#define WIFI_RETRIES 10
 
 #define MQTT_HOST IPAddress(192, 168, 0, 103)
 #define MQTT_PORT 1883
@@ -21,3 +22,4 @@
 
 //time ESP32 will go to sleep (in seconds)
 #define TIME_TO_SLEEP 86400
+#define TIME_TO_SLEEP_WIFI_NOT_AVAILABLE 600
