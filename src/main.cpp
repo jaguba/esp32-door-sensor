@@ -29,6 +29,21 @@ String GetWakeupReason()
     return GetWakeupReasonFromSleep();
 }
 
+String GetSensorType(DeviceType deviceType)
+{
+  switch (deviceType)
+  {
+    case DeviceType::dw:
+      return "door";
+    case DeviceType::flood:
+      return "flood";
+    case DeviceType::rain:
+      return "rain";
+    default:
+      return "unknown";
+  }
+}
+
 String GetSensorState()
 {
   String state;
@@ -103,7 +118,7 @@ void DisconnectFromWifi()
 
 void DisconnectFromMqtt()
 {
-  Serial.println("Disconnecting from Mqtt...");
+  Serial.println("Disconnecting from MQTT...");
 
   //manual disconnection
   _mqttManualDisconnect = true;
@@ -162,12 +177,12 @@ void onMqttConnect(bool sessionPresent)
   Serial.println(sessionPresent);
 
   //topic base
-  String baseTopic = MQTT_TOPIC + String("/") + String(_deviceType) + String("-") + _mac;
+  String baseTopic = MQTT_TOPIC + String("/") + GetSensorType(_deviceType) + String("-") + _mac;
 
-  MqttPublish(_mqttClient, baseTopic, "firmware_version", FIRMWARE_VERSION);
-  MqttPublish(_mqttClient, baseTopic, "bootCount", String(_bootCount));
-  MqttPublish(_mqttClient, baseTopic, "state", GetSensorState());
-  MqttPublish(_mqttClient, baseTopic, "act_reason", _wakeupReason);
+  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "firmware_version", FIRMWARE_VERSION);
+  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "bootCount", String(_bootCount));
+  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "state", GetSensorState());
+  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "act_reason", _wakeupReason);
 
   //get NTP time
   bool ntpResult = false;
@@ -178,8 +193,8 @@ void onMqttConnect(bool sessionPresent)
   char timeStringBuff[50];
   strftime(timeStringBuff, sizeof(timeStringBuff), "%Y-%m-%d %H:%M:%S+00:00", &ntpTimeInfo);
 
-  MqttPublish(_mqttClient, baseTopic, "time", timeStringBuff);
-  MqttPublish(_mqttClient, baseTopic, "millis", String(millis()));
+  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "time", timeStringBuff);
+  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "millis", String(millis()));
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
@@ -193,7 +208,7 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
     return;
 
   //log
-  Serial.println("Can't connect to Mqtt server");
+  Serial.println("Can't connect to MQTT server");
 
   //disconnect from WIFI
   DisconnectFromWifi();

@@ -22,11 +22,11 @@ String GetWakeupReasonFromSleep()
   }
 }
 
-uint16_t MqttPublish(AsyncMqttClient mqttClient, String baseTopic, String topic, String message)
+uint16_t MqttPublish(AsyncMqttClient *mqttClient, String baseTopic, String topic, String message)
 {
   String fullTopic = baseTopic + String("/") + topic;
   Serial.println(message);
-  uint16_t messageId = mqttClient.publish(fullTopic.c_str(), 2, true, message.c_str());
+  uint16_t messageId = mqttClient->publish(fullTopic.c_str(), 2, true, message.c_str());
   Serial.printf("Message id: %d\n", messageId);
 
   return messageId;
