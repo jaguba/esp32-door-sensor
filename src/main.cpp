@@ -203,6 +203,10 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
   Serial.print("Disconnect Reason : ");
   Serial.println(static_cast<uint8_t>(reason));
 
+  //we don't want to handle this state when manual disconnection
+  if (_mqttManualDisconnect)
+    return;
+
   //check if tcp disconnected
   if (reason != AsyncMqttClientDisconnectReason::TCP_DISCONNECTED)
     return;
