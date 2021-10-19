@@ -181,6 +181,7 @@ void onMqttConnect(bool sessionPresent)
 
   _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "firmware_version", FIRMWARE_VERSION);
   _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "bootCount", String(_bootCount));
+  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "ip", WiFi.localIP().toString());
   _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "state", GetSensorState());
   _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "act_reason", _wakeupReason);
 
