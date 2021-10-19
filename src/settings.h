@@ -1,4 +1,4 @@
-#define FIRMWARE_VERSION "1.0.4"
+#define FIRMWARE_VERSION "1.0.5"
 
 #define REED_PIN 15
 
