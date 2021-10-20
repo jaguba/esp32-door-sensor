@@ -12,6 +12,7 @@ RTC_DATA_ATTR int _bootCount = 0;
 
 AsyncMqttClient _mqttClient;
 String _wakeupReason;
+String _bootSensorState;
 
 bool _wifiManualDisconnect = false;
 bool _mqttManualDisconnect = false;
@@ -49,7 +50,7 @@ String GetSensorState()
 
   //PIN mode
   //undone: ¿hace falta esto? ¿cual de los dos hace falta?
-  pinMode(REED_PIN, INPUT_PULLUP);
+  //pinMode(REED_PIN, INPUT_PULLUP);
 
   //check is PIN is open
   bool isOpen = digitalRead(REED_PIN);
@@ -200,9 +201,10 @@ void onMqttConnect(bool sessionPresent)
   String baseTopic = GetMqttBaseTopic();
 
   _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "firmwareVersion", FIRMWARE_VERSION);
-  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "bootCount", String(_bootCount));
   _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "hostName", WiFi.getHostname());
   _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "ip", WiFi.localIP().toString());
+  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "bootCount", String(_bootCount));
+  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "bootState", _bootSensorState);
   _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "state", GetSensorState());
   _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "updateReason", _wakeupReason);
 
@@ -292,6 +294,9 @@ void setup()
 
   //undone: ¿hace falta esto? ¿cual de los dos hace falta?
   pinMode(REED_PIN, INPUT_PULLUP);
+
+  //get sensor state when boot
+  _bootSensorState = GetSensorState();
 
   //callbacks for WIFI
   WiFi.onEvent(WiFiEvent);
