@@ -11,7 +11,6 @@ enum DeviceType { dw, flood, rain };
 RTC_DATA_ATTR int _bootCount = 0;
 
 AsyncMqttClient _mqttClient;
-String _mac;
 String _wakeupReason;
 
 bool _wifiManualDisconnect = false;
@@ -90,11 +89,31 @@ void GoToSleep(uint64_t seconds)
   esp_deep_sleep_start();
 }
 
+String GetHostname()
+{
+  //get mac address
+  String mac = WiFi.macAddress();
+
+  //replace dots and get half of the address
+  mac.replace(":", "");
+  mac = mac.substring(6);
+
+  //get device type and set to upper case
+  String dt = GetSensorType(_deviceType);
+  dt.toUpperCase();
+
+  return WIFI_HOSTNAME + String("_") + dt + String("_") + mac;
+}
+
 void connectToWifi()
 {
+  //log
   Serial.println("Connecting to Wi-Fi...");
 
-  WiFi.setHostname(WIFI_HOSTNAME);
+  //set hostname
+  WiFi.setHostname(GetHostname().c_str());
+
+  //connect to WIFI
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 }
 
@@ -138,14 +157,6 @@ void WiFiEvent(WiFiEvent_t event)
       Serial.println("IP address: ");
       Serial.println(WiFi.localIP());
 
-      //mac address
-      _mac = WiFi.macAddress();
-      _mac.replace(":", "");
-
-      //log
-      Serial.println("MAC address: ");
-      Serial.println(_mac);
-
       connectToMqtt();
       break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
@@ -170,6 +181,15 @@ void WiFiEvent(WiFiEvent_t event)
   }
 }
 
+String GetMqttBaseTopic()
+{
+  //mac address
+  String mac = WiFi.macAddress();
+  mac.replace(":", "");
+
+  return MQTT_TOPIC + String("/") + GetSensorType(_deviceType) + String("-") + mac;
+}
+
 void onMqttConnect(bool sessionPresent)
 {
   Serial.println("Connected to MQTT.");
@@ -177,49 +197,58 @@ void onMqttConnect(bool sessionPresent)
   Serial.println(sessionPresent);
 
   //topic base
-  String baseTopic = MQTT_TOPIC + String("/") + GetSensorType(_deviceType) + String("-") + _mac;
+  String baseTopic = GetMqttBaseTopic();
 
-  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "firmware_version", FIRMWARE_VERSION);
+  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "firmwareVersion", FIRMWARE_VERSION);
   _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "bootCount", String(_bootCount));
+  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "hostName", WiFi.getHostname());
   _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "ip", WiFi.localIP().toString());
   _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "state", GetSensorState());
-  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "act_reason", _wakeupReason);
+  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "updateReason", _wakeupReason);
 
   //get NTP time
   bool ntpResult = false;
   tm ntpTimeInfo;
   GetNtpTime(NTP_SERVER, NTP_OFFSET, NTP_DAYLIGHT_OFFSET, &ntpTimeInfo, &ntpResult);
 
-  //parse time
-  char timeStringBuff[50];
-  strftime(timeStringBuff, sizeof(timeStringBuff), "%Y-%m-%d %H:%M:%S+00:00", &ntpTimeInfo);
+  if (ntpResult)
+  {
+    //parse time
+    char timeStringBuff[50];
+    strftime(timeStringBuff, sizeof(timeStringBuff), "%Y-%m-%d %H:%M:%S+00:00", &ntpTimeInfo);
 
-  _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "time", timeStringBuff);
+    _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "time", timeStringBuff);
+  }
+
   _lastPublishedId = MqttPublish(&_mqttClient, baseTopic, "millis", String(millis()));
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 {
   Serial.println("Disconnected from MQTT.");
-  Serial.print("Disconnect Reason : ");
+  Serial.print("Disconnect reason: ");
   Serial.println(static_cast<uint8_t>(reason));
 
-  //we don't want to handle this state when manual disconnection
-  if (_mqttManualDisconnect)
-    return;
+  switch (reason)
+  {
+    case AsyncMqttClientDisconnectReason::TCP_DISCONNECTED:
+      //we don't want to handle this state when manual disconnection
+       if (_mqttManualDisconnect)
+         return;
 
-  //check if tcp disconnected
-  if (reason != AsyncMqttClientDisconnectReason::TCP_DISCONNECTED)
-    return;
+      //log
+      Serial.println("Can't connect to MQTT server");
 
-  //log
-  Serial.println("Can't connect to MQTT server");
+      //disconnect from WIFI
+      DisconnectFromWifi();
 
-  //disconnect from WIFI
-  DisconnectFromWifi();
+      //sleep for a while and try later to connect
+      GoToSleep(TIME_TO_SLEEP_WIFI_NOT_AVAILABLE);
 
-  //sleep for a while and try later to connect
-  GoToSleep(TIME_TO_SLEEP_WIFI_NOT_AVAILABLE);
+      break;
+    default:
+      break;
+  }
 }
 
 void onMqttSubscribe(uint16_t packetId, uint8_t qos)

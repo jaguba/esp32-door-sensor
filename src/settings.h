@@ -2,7 +2,7 @@
 
 #define REED_PIN 15
 
-#define WIFI_HOSTNAME "ESPNOW_1"
+#define WIFI_HOSTNAME "IOT"
 #define WIFI_SSID "yourssid"
 #define WIFI_PASSWORD "yourpassw0rd"
 #define WIFI_RETRIES 10
