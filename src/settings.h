@@ -5,7 +5,8 @@ enum SensorType { dw, flood, rain, mailbox };
 
 #define FIRMWARE_VERSION "1.0.5"
 
-#define REED_PIN 15
+#define SWITCH_PIN_NUMBER 15
+#define GPIO_NUMBER gpio_num_t::GPIO_NUM_15
 
 #define WIFI_HOSTNAME "IOT"
 #define WIFI_SSID "yourssid"

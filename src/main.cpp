@@ -35,6 +35,8 @@ String GetSensorType(SensorType sensorType)
       return "flood";
     case SensorType::rain:
       return "rain";
+    case SensorType::mailbox:
+      return "mailbox";
     default:
       return "unknown";
   }
@@ -45,11 +47,12 @@ String GetSensorState()
   String state;
 
   //check is PIN is open
-  bool isOpen = digitalRead(REED_PIN);
+  bool isOpen = digitalRead(SWITCH_PIN_NUMBER);
 
   switch (SENSOR_TYPE)
   {
     case SensorType::dw:
+    case SensorType::mailbox:
       state = isOpen ? "closed" : "open";
       break;
     case SensorType::flood:
@@ -67,10 +70,10 @@ String GetSensorState()
 void GoToSleep(uint64_t seconds)
 {
   //wake up trigger
-  bool wakeupTrigger = !digitalRead(REED_PIN);
+  bool wakeupTrigger = !digitalRead(SWITCH_PIN_NUMBER);
 
   //wake up when PIN change
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_15, wakeupTrigger);
+  esp_sleep_enable_ext0_wakeup(GPIO_NUMBER, wakeupTrigger);
 
   //wake up by timer
   esp_sleep_enable_timer_wakeup(seconds * uS_TO_S_FACTOR);
@@ -285,7 +288,7 @@ void setup()
   Serial.println(_wakeupReason);
 
   //set pin mode
-  pinMode(REED_PIN, INPUT_PULLUP);
+  pinMode(SWITCH_PIN_NUMBER, INPUT_PULLUP);
 
   //get sensor state when boot
   _bootSensorState = GetSensorState();
