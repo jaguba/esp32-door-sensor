@@ -28,7 +28,6 @@ uint16_t MqttPublish(AsyncMqttClient *mqttClient, String baseTopic, String topic
 
   Serial.println("Publishing message: " + topic);
   Serial.println("  " + message);
-  //Serial.println(message);
 
   uint16_t messageId = mqttClient->publish(fullTopic.c_str(), 2, true, message.c_str());
   Serial.printf("Message id: %d\n", messageId);
