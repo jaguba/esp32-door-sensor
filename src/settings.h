@@ -1,3 +1,8 @@
+//enumerations
+enum SensorType { dw, flood, rain, mailbox };
+
+#define SENSOR_TYPE SensorType::flood
+
 #define FIRMWARE_VERSION "1.0.5"
 
 #define REED_PIN 15

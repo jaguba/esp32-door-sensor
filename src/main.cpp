@@ -6,8 +6,6 @@
 #include "utils.h"
 #include "sntp.h"
 
-enum DeviceType { dw, flood, rain };
-
 RTC_DATA_ATTR int _bootCount = 0;
 
 AsyncMqttClient _mqttClient;
@@ -19,8 +17,6 @@ bool _mqttManualDisconnect = false;
 uint16_t _wifiRetriesCount = 0;
 uint16_t _lastPublishedId;
 
-DeviceType _deviceType = DeviceType::flood;
-
 String GetWakeupReason()
 {
   if (_bootCount == 1)
@@ -29,15 +25,15 @@ String GetWakeupReason()
     return GetWakeupReasonFromSleep();
 }
 
-String GetSensorType(DeviceType deviceType)
+String GetSensorType(SensorType sensorType)
 {
-  switch (deviceType)
+  switch (sensorType)
   {
-    case DeviceType::dw:
+    case SensorType::dw:
       return "door";
-    case DeviceType::flood:
+    case SensorType::flood:
       return "flood";
-    case DeviceType::rain:
+    case SensorType::rain:
       return "rain";
     default:
       return "unknown";
@@ -48,20 +44,16 @@ String GetSensorState()
 {
   String state;
 
-  //PIN mode
-  //undone: ¿hace falta esto? ¿cual de los dos hace falta?
-  //pinMode(REED_PIN, INPUT_PULLUP);
-
   //check is PIN is open
   bool isOpen = digitalRead(REED_PIN);
 
-  switch (_deviceType)
+  switch (SENSOR_TYPE)
   {
-    case DeviceType::dw:
+    case SensorType::dw:
       state = isOpen ? "closed" : "open";
       break;
-    case DeviceType::flood:
-    case DeviceType::rain:
+    case SensorType::flood:
+    case SensorType::rain:
       state = isOpen ? "dry" : "wet";
       break;
     default:
@@ -100,7 +92,7 @@ String GetHostname()
   mac = mac.substring(6);
 
   //get device type and set to upper case
-  String dt = GetSensorType(_deviceType);
+  String dt = GetSensorType(SENSOR_TYPE);
   dt.toUpperCase();
 
   return WIFI_HOSTNAME + String("_") + dt + String("_") + mac;
@@ -188,7 +180,7 @@ String GetMqttBaseTopic()
   String mac = WiFi.macAddress();
   mac.replace(":", "");
 
-  return MQTT_TOPIC + String("/") + GetSensorType(_deviceType) + String("-") + mac;
+  return MQTT_TOPIC + String("/") + GetSensorType(SENSOR_TYPE) + String("-") + mac;
 }
 
 void onMqttConnect(bool sessionPresent)
@@ -288,11 +280,11 @@ void setup()
   Serial.begin(115200);
   _bootCount++;
 
-  //print the wakeup reason for ESP32
+  //get wakeup reason for ESP32
   _wakeupReason = GetWakeupReason();
   Serial.println(_wakeupReason);
 
-  //undone: ¿hace falta esto? ¿cual de los dos hace falta?
+  //set pin mode
   pinMode(REED_PIN, INPUT_PULLUP);
 
   //get sensor state when boot
