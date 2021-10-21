@@ -3,6 +3,7 @@
 #include <AsyncMqttClient.h>
 
 #include "settings.h"
+#include "secrets.h"
 #include "utils.h"
 #include "sntp.h"
 

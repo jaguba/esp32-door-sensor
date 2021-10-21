@@ -3,21 +3,15 @@ enum SensorType { dw, flood, rain, mailbox };
 
 #define SENSOR_TYPE SensorType::flood
 
-#define FIRMWARE_VERSION "1.0.5"
+#define FIRMWARE_VERSION "1.0.6"
 
 #define SWITCH_PIN_NUMBER 15
 #define GPIO_NUMBER gpio_num_t::GPIO_NUM_15
 
 #define WIFI_HOSTNAME "IOT"
-#define WIFI_SSID "yourssid"
-#define WIFI_PASSWORD "yourpassw0rd"
 #define WIFI_RETRIES 10
 
-#define MQTT_HOST IPAddress(192, 168, 0, 103)
-#define MQTT_PORT 1883
 #define MQTT_TOPIC "ESP32"
-#define MQTT_USERNAME "mqttuser"
-#define MQTT_PASSWORD "yourpassw0rd"
 
 #define NTP_SERVER "pool.ntp.org"
 #define NTP_OFFSET 0
