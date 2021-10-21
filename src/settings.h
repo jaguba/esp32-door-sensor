@@ -15,7 +15,7 @@ enum SensorType { dw, flood, rain, mailbox };
 
 #define MQTT_HOST IPAddress(192, 168, 0, 103)
 #define MQTT_PORT 1883
-#define MQTT_TOPIC "ESPNOW/1"
+#define MQTT_TOPIC "ESP32"
 #define MQTT_USERNAME "mqttuser"
 #define MQTT_PASSWORD "yourpassw0rd"
 
