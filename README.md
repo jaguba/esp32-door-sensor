@@ -1,6 +1,6 @@
 # esp32-door-sensor
 
-ESP32 project for monitoring the state of a (mailbox) door with a battery driven sensor.
+ESP32 project for monitoring the state of several devices such as a door, window, flood or rain sensor.
 
 ## Instructions
 
