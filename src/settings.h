@@ -3,7 +3,7 @@ enum SensorType { dw, flood, rain, mailbox };
 
 #define SENSOR_TYPE SensorType::flood
 
-#define FIRMWARE_VERSION "1.0.6"
+#define FIRMWARE_VERSION "1.0.7"
 
 #define SWITCH_PIN_NUMBER 15
 #define GPIO_NUMBER gpio_num_t::GPIO_NUM_15
