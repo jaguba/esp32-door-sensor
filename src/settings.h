@@ -11,7 +11,7 @@ enum SensorType { dw, flood, rain, mailbox };
 #define WIFI_HOSTNAME "IOT"
 #define WIFI_RETRIES 10
 
-#define MQTT_TOPIC "ESP32"
+#define MQTT_TOPIC "Jgb.IoT"
 
 #define NTP_SERVER "pool.ntp.org"
 #define NTP_OFFSET 0
