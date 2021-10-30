@@ -77,6 +77,7 @@ void GoToSleep(uint64_t seconds)
   //release adc module
   adc_power_release();
   //esp_wifi_stop();
+  //esp_bt_controller_disable();
 
   //wake up when PIN change
   esp_sleep_enable_ext0_wakeup(GPIO_NUMBER, wakeupTrigger);
