@@ -8,6 +8,9 @@
 #include "utils.h"
 #include "sntp.h"
 
+#define SENSOR_TYPE_UNKNOWN "unknown"
+#define STATE_UNDEFINED "undefined"
+
 RTC_DATA_ATTR int _bootCount = 0;
 
 AsyncMqttClient _mqttClient;
@@ -40,40 +43,44 @@ String GetSensorType(SensorType sensorType)
     case SensorType::mailbox:
       return "mailbox";
     default:
-      return "unknown";
+      return SENSOR_TYPE_UNKNOWN;
+  }
+}
+
+String GetSensorState(bool state)
+{
+  switch (SENSOR_TYPE)
+  {
+    case SensorType::dw:
+    case SensorType::mailbox:
+      return state ? "closed" : "open";
+      break;
+    case SensorType::flood:
+    case SensorType::rain:
+      return state ? "dry" : "wet";
+      break;
+    default:
+      return STATE_UNDEFINED;
+      break;
   }
 }
 
 String GetSensorState()
 {
   bool currentFlows;
-  bool on;
-  String state;
 
   //check if circuit is high (contacts closed)
   currentFlows = digitalRead(SWITCH_PIN_NUMBER) == HIGH;
 
-  if (SWITCH_TYPE == SwitchType::nc)
-    on = currentFlows;
-  else
-    on = !currentFlows;
-
-  switch (SENSOR_TYPE)
+  switch (SWITCH_TYPE)
   {
-    case SensorType::dw:
-    case SensorType::mailbox:
-      state = on ? "closed" : "open";
-      break;
-    case SensorType::flood:
-    case SensorType::rain:
-      state = on ? "dry" : "wet";
-      break;
+    case SwitchType::no:
+      return GetSensorState(currentFlows);
+    case SwitchType::nc:
+      return GetSensorState(!currentFlows);
     default:
-      state = "undefined";
-      break;
+      return STATE_UNDEFINED;
   }
-
-  return state;
 }
 
 void GoToSleep(uint64_t seconds)
