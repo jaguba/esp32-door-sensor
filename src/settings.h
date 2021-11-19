@@ -1,9 +1,14 @@
 //enumerations
 enum SensorType { dw, flood, rain, mailbox };
 
-#define SENSOR_TYPE SensorType::flood
+//Normally open - Is a contact that does not flow current in its normal state.  Energizing it and switching it on will close the contact, causing it to allow current flow.
+//Normally closed - Is a contact that flows current in its normal state.  Energizing it and switching it on will open the contact, causing it to not allow current flow.
+enum SwitchType { nc, no };
 
-#define FIRMWARE_VERSION "1.0.7"
+#define SENSOR_TYPE SensorType::flood
+#define SWITCH_TYPE SwitchType::nc
+
+#define FIRMWARE_VERSION "1.0.8"
 
 #define SWITCH_PIN_NUMBER 15
 #define GPIO_NUMBER gpio_num_t::GPIO_NUM_15

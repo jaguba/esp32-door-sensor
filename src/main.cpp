@@ -46,20 +46,27 @@ String GetSensorType(SensorType sensorType)
 
 String GetSensorState()
 {
+  bool currentFlows;
+  bool on;
   String state;
 
-  //check is PIN is open
-  bool isOpen = digitalRead(SWITCH_PIN_NUMBER);
+  //check if circuit is high (contacts closed)
+  currentFlows = digitalRead(SWITCH_PIN_NUMBER) == HIGH;
+
+  if (SWITCH_TYPE == SwitchType::nc)
+    on = currentFlows;
+  else
+    on = !currentFlows;
 
   switch (SENSOR_TYPE)
   {
     case SensorType::dw:
     case SensorType::mailbox:
-      state = isOpen ? "closed" : "open";
+      state = on ? "closed" : "open";
       break;
     case SensorType::flood:
     case SensorType::rain:
-      state = isOpen ? "dry" : "wet";
+      state = on ? "dry" : "wet";
       break;
     default:
       state = "undefined";
