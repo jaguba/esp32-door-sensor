@@ -35,7 +35,7 @@ String GetSensorType(SensorType sensorType)
   switch (sensorType)
   {
     case SensorType::dw:
-      return "door";
+      return "dw";
     case SensorType::flood:
       return "flood";
     case SensorType::rain:
